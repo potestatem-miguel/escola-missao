@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estuda Kids IA | Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="login-shell">
+    <section class="login-card">
+      <span class="sidebar-badge">Estuda Kids IA</span>
+      <h1>Entrar na área do responsável</h1>
+      <p>Use sua conta para acessar a página inicial, as crianças cadastradas, os exercícios e os relatórios em qualquer computador.</p>
+
+      <div class="auth-mode-switch">
+        <button type="button" class="secondary-button active-auth-mode" data-auth-mode="login">Entrar</button>
+        <button type="button" class="secondary-button" data-auth-mode="register">Criar conta</button>
+      </div>
+
+      <form id="login-form" class="content-form">
+        <label>
+          <span>Email</span>
+          <input type="email" name="email" required>
+        </label>
+
+        <label>
+          <span>Senha</span>
+          <input type="password" name="password" required>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">Entrar</button>
+        </div>
+      </form>
+
+      <form id="register-form" class="content-form hidden">
+        <label>
+          <span>Seu nome</span>
+          <input type="text" name="fullName" placeholder="Ex.: Miguel Vicente" required>
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input type="email" name="registerEmail" required>
+        </label>
+
+        <label>
+          <span>Senha</span>
+          <input type="password" name="registerPassword" minlength="6" required>
+        </label>
+
+        <label>
+          <span>Confirmar senha</span>
+          <input type="password" name="confirmPassword" minlength="6" required>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">Criar conta</button>
+        </div>
+      </form>
+
+      <div id="login-status" class="status-banner hidden"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
