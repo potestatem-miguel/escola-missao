@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estuda Kids IA | Cadastro da crian&ccedil;a</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-badge">Estuda Kids IA</span>
+        <h1>Cadastro da crian&ccedil;a</h1>
+        <p>Cadastre os perfis para organizar a p&aacute;gina inicial e preparar as pr&oacute;ximas funcionalidades.</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="sidebar-link" href="index.html">P&aacute;gina inicial</a>
+        <a class="sidebar-link active" href="children.html">Cadastro da crian&ccedil;a</a>
+        <a class="sidebar-link" href="study.html">Área de estudo</a>
+        <a class="sidebar-link" href="homework.html">Área de lição de casa</a>
+        <a class="sidebar-link" href="reports.html">Relat&oacute;rios</a>
+      </nav>
+
+      <div class="sidebar-session">
+        <span class="session-email" data-session-email></span>
+        <button class="secondary-button session-logout" type="button" data-logout-button>Sair</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <div>
+          <span class="eyebrow">Cadastro</span>
+          <h2>Adicionar nova crian&ccedil;a</h2>
+          <p>Preencha o nome, a s&eacute;rie e at&eacute; tr&ecirc;s desenhos favoritos para deixar a experi&ecirc;ncia mais personalizada.</p>
+        </div>
+        <div class="dashboard-header-actions">
+          <a class="secondary-button dashboard-action" href="study.html">Ir para a &aacute;rea de estudo</a>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+            Ativar modo escuro
+          </button>
+        </div>
+      </header>
+
+      <div class="registry-layout">
+        <section class="panel registry-form-panel">
+          <h3>Novo cadastro</h3>
+          <p class="registry-copy">Cada envio adiciona uma crian&ccedil;a nova ao painel do respons&aacute;vel.</p>
+
+          <form id="children-form" class="content-form">
+            <div class="field-grid">
+              <label>
+                <span>Nome</span>
+                <input id="child-name" name="studentName" type="text" placeholder="Ex.: Miguel" required>
+              </label>
+
+              <label>
+                <span>Idade</span>
+                <input id="child-age" name="age" type="number" min="5" max="16" placeholder="Ex.: 8" required>
+              </label>
+            </div>
+
+            <label>
+              <span>S&eacute;rie</span>
+              <select id="child-grade" name="grade" required>
+                <option value="1 ano">1 ano</option>
+                <option value="2 ano">2 ano</option>
+                <option value="3 ano">3 ano</option>
+                <option value="4 ano">4 ano</option>
+                <option value="5 ano">5 ano</option>
+                <option value="6 ano">6 ano</option>
+                <option value="7 ano">7 ano</option>
+                <option value="8 ano">8 ano</option>
+                <option value="9 ano">9 ano</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Desenho favorito 1</span>
+              <input name="favoriteTheme1" type="text" placeholder="Ex.: Dragon Ball Z" required>
+            </label>
+
+            <label>
+              <span>Desenho favorito 2</span>
+              <input name="favoriteTheme2" type="text" placeholder="Ex.: Patrulha Canina">
+            </label>
+
+            <label>
+              <span>Desenho favorito 3</span>
+              <input name="favoriteTheme3" type="text" placeholder="Ex.: Frozen">
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="primary-button">Salvar cadastro</button>
+            </div>
+          </form>
+
+          <div id="children-status" class="status-banner hidden"></div>
+        </section>
+
+        <section class="panel registered-children-panel">
+          <h3>Crian&ccedil;as cadastradas</h3>
+          <p class="registry-copy">Os perfis abaixo ficam salvos na sua conta e aparecem em qualquer computador depois do login.</p>
+          <div id="children-list" class="registered-children-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="supabase-data.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="children.js"></script>
+</body>
+</html>

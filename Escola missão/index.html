@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estuda Kids IA | Página inicial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-badge">Estuda Kids IA</span>
+        <h1>Painel do respons&aacute;vel</h1>
+        <p>Acompanhe o desempenho das crian&ccedil;as e acesse as pr&oacute;ximas &aacute;reas da plataforma.</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="sidebar-link active" href="index.html">Página inicial</a>
+        <a class="sidebar-link" href="children.html">Cadastro da crian&ccedil;a</a>
+        <a class="sidebar-link" href="study.html">Área de estudo</a>
+        <a class="sidebar-link" href="homework.html">Área de lição de casa</a>
+        <a class="sidebar-link" href="reports.html">Relat&oacute;rios</a>
+      </nav>
+
+      <div class="sidebar-session">
+        <span class="session-email" data-session-email></span>
+        <button class="secondary-button session-logout" type="button" data-logout-button>Sair</button>
+      </div>
+    </aside>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <div>
+          <span class="eyebrow">Acompanhamento</span>
+          <h2>Vis&atilde;o geral do desempenho</h2>
+          <p>Veja quantas quest&otilde;es cada crian&ccedil;a respondeu, quantos acertos acumulou e o aproveitamento geral.</p>
+        </div>
+        <div class="dashboard-header-actions">
+          <a class="secondary-button dashboard-action" href="study.html">Ir para a &aacute;rea de estudo</a>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false">
+            Ativar modo escuro
+          </button>
+        </div>
+      </header>
+
+      <section id="dashboard-empty" class="panel dashboard-empty hidden">
+        <h3>Nenhuma atividade registrada ainda</h3>
+        <p>Assim que uma crian&ccedil;a for cadastrada ou responder exerc&iacute;cios na &aacute;rea de estudo, os cards aparecer&atilde;o aqui.</p>
+      </section>
+
+      <section id="dashboard-grid" class="dashboard-grid"></section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="supabase-data.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
