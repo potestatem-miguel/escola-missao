@@ -1,0 +1,9 @@
+1. Dê duplo clique em `iniciar-servidor.bat`.
+
+2. Se o navegador abrir em `http://localhost:8000`, o app está pronto para teste.
+
+3. Se aparecer a mensagem `PHP nao foi encontrado no computador`, instale primeiro um ambiente com PHP:
+   - XAMPP
+   - Laragon
+
+4. Depois de instalar, execute `iniciar-servidor.bat` novamente.
