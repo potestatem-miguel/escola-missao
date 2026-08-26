@@ -168,7 +168,24 @@ function renderHomeworkResult(content) {
   homeworkMeta.textContent = `${content.studentName} | ${content.grade}`;
   homeworkTitle.textContent = content.title;
   homeworkIntro.textContent = content.intro;
-  homeworkSteps.innerHTML = content.items.map((item, index) => `
+  const subjectOverviewHtml = content.subjectOverview
+    ? `
+      <section class="lesson-card homework-step">
+        <div class="homework-step-header">
+          <span class="content-tag">Matéria do arquivo</span>
+          <h3>${escapeHtml(content.subjectOverview.title || "Explicação da matéria")}</h3>
+        </div>
+        <p>${escapeHtml(content.subjectOverview.body || "")}</p>
+        ${
+          Array.isArray(content.subjectOverview.bullets) && content.subjectOverview.bullets.length > 0
+            ? `<ul>${content.subjectOverview.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+            : ""
+        }
+      </section>
+    `
+    : "";
+
+  homeworkSteps.innerHTML = subjectOverviewHtml + content.items.map((item, index) => `
     <section class="lesson-card homework-step">
       <div class="homework-step-header">
         <span class="content-tag">Exercício ${index + 1}</span>

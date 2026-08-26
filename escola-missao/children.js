@@ -16,6 +16,21 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function buildPreferenceTags(favoriteThemes = []) {
+  const labels = ["Desenho", "Esporte", "Filme ou série"];
+
+  return favoriteThemes
+    .map((theme, index) => {
+      if (!theme) {
+        return "";
+      }
+
+      return `<span class="profile-tag">${escapeHtml(labels[index] || "Preferência")}: ${escapeHtml(theme)}</span>`;
+    })
+    .filter(Boolean)
+    .join("");
+}
+
 async function renderChildrenList() {
   if (!childrenList || !window.EstudaData) {
     return;
@@ -41,7 +56,7 @@ async function renderChildrenList() {
         </div>
         <p class="registry-copy">${escapeHtml(String(child.age || ""))} anos</p>
         <div class="profile-tags">
-          ${child.favoriteThemes.map((theme) => `<span class="profile-tag">${escapeHtml(theme)}</span>`).join("")}
+          ${buildPreferenceTags(child.favoriteThemes)}
         </div>
       </article>
     `).join("");
