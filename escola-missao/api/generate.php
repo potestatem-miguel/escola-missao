@@ -134,7 +134,7 @@ function generateWithGoogle(array $payload, string $apiKey, string $model): arra
     $previousQuestions = array_values(array_filter($payload['previousQuestions'] ?? [], 'is_string'));
     $attachments = array_values(array_filter($payload['attachments'] ?? [], 'is_array'));
     $themeInstruction = $theme !== ''
-        ? "Use o universo de {$theme} como referencia ludica tanto na explicacao quanto nas questoes."
+        ? "Use o universo de {$theme} como referencia ludica tanto na explicacao quanto nas questoes, mas sem substituir a materia real."
         : 'Nao use personagens especificos; mantenha uma linguagem divertida e infantil.';
 
     $retryInstruction = $retryMode
@@ -219,6 +219,15 @@ function generateWithGoogle(array $payload, string $apiKey, string $model): arra
         'Se houver PDF ou imagens anexadas, trate esses arquivos como fonte principal do conteudo didatico.',
         'Leia o conteudo do material anexado e recrie a explicacao de forma mais ludica e facilitada.',
         'Nao invente assunto fora do que aparece no material anexado, exceto para simplificar e explicar melhor.',
+        'A explicacao deve ensinar a materia e o topico de verdade. Nao explique "como estudar", "como aprender" ou "como fazer prova" no lugar do conteudo.',
+        'Se a materia for Matematica, ensine a regra, a operacao, o passo a passo e exemplos coerentes com o topico pedido.',
+        'Se a materia for Portugues, ensine a classe gramatical, a regra, a funcao na frase e exemplos coerentes com o topico pedido.',
+        'Se a materia for Historia, Geografia ou Ciencias, ensine os fatos, conceitos, causas, exemplos e relacoes corretas do topico pedido.',
+        'As questoes precisam avaliar o conteudo da materia. Cada enunciado deve testar uma regra, conceito, exemplo, operacao, interpretacao ou aplicacao do assunto estudado.',
+        'E proibido criar questoes metacognitivas ou vagas, como "o que ajuda a aprender", "o que mostra que voce entendeu", "qual atitude e melhor" ou parecidas.',
+        'As alternativas erradas devem ser plausiveis, mas precisam estar relacionadas ao mesmo conteudo da materia.',
+        'Cada explicacao do gabarito deve dizer por que a correta esta certa e por que as outras nao correspondem ao conteudo estudado.',
+        'Use a referencia ludica como contexto, cenario e exemplos, mas a pergunta central deve continuar sendo sobre a materia real.',
         'Se o objetivo for "Exercicios", retorne lessonSections vazio e gere apenas as questoes.',
         'Se o objetivo for "Explicacao + Exercicios", retorne explicacao completa e as questoes.',
         'Se o objetivo for "Explicacao", retorne explicacao completa e questions vazio para todas as criancas.',
@@ -241,7 +250,8 @@ function generateWithGoogle(array $payload, string $apiKey, string $model): arra
                 'id' => (string) $child['id'],
                 'nome' => (string) $child['studentName'],
                 'idade' => (int) $child['age'],
-                'serie' => (string) $child['grade']
+                'serie' => (string) $child['grade'],
+                'preferencias' => array_values(array_filter($child['favoriteThemes'] ?? [], 'is_string'))
             ];
         }, $payload['children']),
         'questoes_anteriores' => $previousQuestions
@@ -360,7 +370,7 @@ function generateFallback(array $payload): array
 
     return [
         'title' => "Aula personalizada sobre {$topicLabel}",
-        'intro' => "Conteudo de {$subject} com referencias inspiradas em {$themeLabel}.",
+        'intro' => "Conteudo de {$subject} com explicacao da materia e referencias inspiradas em {$themeLabel}.",
         'subject' => $subject,
         'topic' => $topicLabel,
         'difficulty' => $difficulty,
@@ -374,72 +384,72 @@ function generateFallbackQuestions(string $subject, string $topic, int $question
     $questionSets = [
         [
             [
-                'prompt' => "Na aventura inspirada em {$themeLabel}, qual frase mostra melhor que a crianca entendeu o assunto {$topic}?",
+                'prompt' => "Pensando no assunto {$topic} em {$subject}, qual alternativa representa melhor a ideia estudada na aventura de {$themeLabel}?",
                 'options' => [
-                    "Eu consigo explicar {$topic} com minhas palavras.",
-                    'Eu marquei uma resposta sem ler.',
-                    'Eu pulei todos os exemplos.',
-                    'Eu desisti antes de tentar.'
+                    "A alternativa que aplica corretamente a regra de {$topic}.",
+                    'Uma alternativa sem relacao com a materia.',
+                    'Uma frase que nao trata do assunto estudado.',
+                    'Uma opcao escolhida apenas por sorte.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Explicar com as proprias palavras mostra compreensao real do conteudo.'
+                'explanation' => "A resposta correta precisa estar ligada ao conteudo real de {$topic}, e nao a uma atitude generica."
             ],
             [
-                'prompt' => "Ao estudar {$subject} com exemplos inspirados em {$themeLabel}, o que mais ajuda a aprender?",
+                'prompt' => "Na aula de {$subject} com referencias de {$themeLabel}, o que uma boa questao sobre {$topic} precisa verificar?",
                 'options' => [
-                    'Relacionar o assunto a exemplos simples.',
-                    'Ignorar a explicacao.',
-                    'Responder correndo sem pensar.',
-                    'Marcar qualquer alternativa.'
+                    "Se a crianca consegue usar o conteudo de {$topic} em um exemplo.",
+                    'Se a crianca responde sem ler.',
+                    'Se a crianca troca de materia no meio do teste.',
+                    'Se a crianca escolhe a maior frase.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Exemplos simples ajudam a entender e lembrar do que foi estudado.'
+                'explanation' => 'Uma boa questao deve avaliar aplicacao do conteudo, nao comportamento aleatorio.'
             ],
             [
-                'prompt' => "Depois da explicacao sobre {$topic} no universo de {$themeLabel}, o que o exercicio deve verificar?",
+                'prompt' => "Qual alternativa descreve melhor como a referencia de {$themeLabel} deve aparecer em uma questao sobre {$topic}?",
                 'options' => [
-                    'Se a crianca consegue aplicar a ideia aprendida.',
-                    'Se a crianca clicou rapido.',
-                    'Se a crianca decorou palavras sem sentido.',
-                    'Se a crianca deixou tudo em branco.'
+                    'Como contexto ou exemplo, mantendo o foco na materia.',
+                    'Como unica informacao importante, sem ensinar a materia.',
+                    'Com nomes dificeis que atrapalham a leitura.',
+                    'Sem relacao com o conteudo estudado.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Um bom exercicio mede se a crianca conseguiu usar o conhecimento.'
+                'explanation' => 'A referencia ludica deve ajudar a explicar o topico, nao tomar o lugar da materia.'
             ]
         ],
         [
             [
-                'prompt' => "Na missao inspirada em {$themeLabel}, qual atitude ajuda a aprender {$topic}?",
+                'prompt' => "Em uma questao de {$subject} sobre {$topic}, qual alternativa estaria mais alinhada ao conteudo ensinado?",
                 'options' => [
-                    'Ler, pensar e revisar a explicacao.',
-                    'Escolher qualquer resposta sem analisar.',
-                    'Desistir na primeira questao.',
-                    'Ignorar o que foi ensinado.'
+                    "A opcao que usa corretamente a explicacao de {$topic}.",
+                    'Uma frase sem relacao com o assunto.',
+                    'Uma alternativa montada so para parecer divertida.',
+                    'Uma resposta escolhida por impulso.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Aprender bem envolve atencao, tentativa e revisao.'
+                'explanation' => 'A alternativa correta sempre precisa conversar com o conteudo estudado.'
             ],
             [
-                'prompt' => "Quando o sistema mostra a resposta correta depois da aventura de {$themeLabel}, isso serve para:",
+                'prompt' => "Qual tipo de erro deve aparecer nas alternativas erradas de uma questao sobre {$topic}?",
                 'options' => [
-                    'Transformar o erro em aprendizado.',
-                    'Confundir a crianca.',
-                    'Trocar a materia estudada.',
-                    'Apagar a explicacao anterior.'
+                    "Erros parecidos com as duvidas comuns sobre {$topic}.",
+                    'Erros sem nenhuma ligacao com a materia.',
+                    'Frases sobre comportamento em sala.',
+                    'Palavras inventadas e sem contexto.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Ver o gabarito com explicacao ajuda a entender onde acertou ou errou.'
+                'explanation' => 'Distratores bons sao proximos do conteudo real e ajudam a medir a compreensao.'
             ],
             [
-                'prompt' => "Ao estudar {$subject} com o tema {$themeLabel}, o que a crianca precisa fazer primeiro?",
+                'prompt' => "Se a aula ensinou {$topic} com o tema {$themeLabel}, o que a explicacao principal precisa trazer?",
                 'options' => [
-                    'Ler com calma e entender a pergunta.',
-                    'Escolher a primeira alternativa sem pensar.',
-                    'Ignorar o enunciado.',
-                    'Trocar de materia no meio da atividade.'
+                    "A regra, o conceito e exemplos do proprio topico {$topic}.",
+                    'Apenas frases sobre motivacao para estudar.',
+                    'Somente nomes de personagens.',
+                    'Respostas prontas sem explicar a materia.'
                 ],
                 'correctIndex' => 0,
-                'explanation' => 'Entender o que a pergunta pede e o primeiro passo para acertar.'
+                'explanation' => 'A explicacao precisa ensinar o topico de verdade para preparar a crianca para os exercicios.'
             ]
         ]
     ];
@@ -453,29 +463,29 @@ function buildLessonSections(string $subject, string $topic, string $difficulty,
     return [
         [
             'heading' => "Vamos aprender {$topic}",
-            'body' => "Hoje vamos estudar {$topic} em {$subject} com explicacoes simples e seguras, usando referencias claras inspiradas em {$themeLabel}.",
+            'body' => "Hoje vamos estudar {$topic} em {$subject} com uma explicacao simples, correta e ligada a exemplos inspirados em {$themeLabel}.",
             'bullets' => [
                 "A linguagem foi ajustada para o nivel {$difficulty}.",
-                "Os exemplos usam situacoes e clima de {$themeLabel}, mas com palavras simples em portugues.",
-                'A explicacao pode ser acompanhada por pais e responsaveis.'
+                "Os exemplos usam situacoes de {$themeLabel}, mas mantem o foco no conteudo real da materia.",
+                'A explicacao prioriza a regra, o conceito ou a ideia central do assunto.'
             ]
         ],
         [
-            'heading' => 'Como entender esse assunto',
-            'body' => "O objetivo e observar a ideia principal, ver exemplos faceis ligados ao desenho {$themeLabel} e depois praticar.",
+            'heading' => 'Entendendo a materia',
+            'body' => "Primeiro vamos identificar a ideia principal de {$topic}, depois observar exemplos simples e por fim praticar com perguntas ligadas ao conteudo.",
             'bullets' => [
-                'Leia com calma.',
-                "Use as comparacoes inspiradas em {$themeLabel} para lembrar da regra.",
-                'Veja o gabarito como parte do aprendizado.'
+                "Os exemplos fazem ponte entre {$themeLabel} e o assunto estudado.",
+                'As explicacoes evitam palavras complicadas e focam no que a crianca precisa entender.',
+                'As perguntas servem para testar a aplicacao do conteudo.'
             ]
         ],
         [
             'heading' => 'Resumo da aula',
-            'body' => "Os exercicios abaixo usam o mesmo tema de {$themeLabel} para manter o interesse das criancas.",
+            'body' => "Os exercicios abaixo usam o mesmo tema de {$themeLabel} para manter o interesse, mas continuam avaliando {$topic}.",
             'bullets' => [
-                "A aula e explicada com referencias do desenho {$themeLabel}.",
-                'As questoes sao separadas para cada crianca.',
-                'Os testes podem ser refeitos abaixo de 80%.'
+                "A aula explica {$topic} com referencias do universo de {$themeLabel}.",
+                'As questoes precisam conversar com a explicacao apresentada.',
+                'O refazer teste continua disponivel abaixo de 80%.'
             ]
         ]
     ];

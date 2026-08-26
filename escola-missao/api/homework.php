@@ -105,6 +105,19 @@ function generateHomeworkWithGoogle(array $payload, string $apiKey, string $mode
             'grade' => ['type' => 'string'],
             'title' => ['type' => 'string'],
             'intro' => ['type' => 'string'],
+            'subjectOverview' => [
+                'type' => 'object',
+                'additionalProperties' => false,
+                'properties' => [
+                    'title' => ['type' => 'string'],
+                    'body' => ['type' => 'string'],
+                    'bullets' => [
+                        'type' => 'array',
+                        'items' => ['type' => 'string']
+                    ]
+                ],
+                'required' => ['title', 'body', 'bullets']
+            ],
             'items' => [
                 'type' => 'array',
                 'items' => [
@@ -121,7 +134,7 @@ function generateHomeworkWithGoogle(array $payload, string $apiKey, string $mode
                 ]
             ]
         ],
-        'required' => ['studentName', 'grade', 'title', 'intro', 'items']
+        'required' => ['studentName', 'grade', 'title', 'intro', 'subjectOverview', 'items']
     ];
 
     $themeInstruction = $theme !== ''
@@ -131,11 +144,15 @@ function generateHomeworkWithGoogle(array $payload, string $apiKey, string $mode
     $systemPrompt = implode("\n", [
         'Voce e um tutor infantil especializado em explicar licao de casa em portugues do Brasil.',
         'Sua funcao e ajudar a crianca a entender o que cada exercicio pede, sem jamais entregar a resposta final.',
+        'Antes de explicar os exercicios, identifique a materia principal e explique o assunto central do arquivo de forma simples e correta.',
+        'Essa primeira explicacao deve ensinar a materia do arquivo, e nao apenas falar sobre como estudar ou como responder.',
         'E extremamente proibido resolver o exercicio, dar o gabarito, dizer qual alternativa esta certa ou completar a resposta pela crianca.',
         'E extremamente proibido escrever frases como "a resposta e", "o resultado final e", "marque a letra", "copie isto" ou equivalentes.',
         'Explique de forma simples, acolhedora e apropriada para a idade.',
         'Se houver varias questoes no material, transcreva cada exercicio separadamente e explique um por um.',
+        'Cada explicacao precisa estar ligada ao conteudo real do arquivo enviado.',
         'Para cada exercicio, explique o que esta sendo pedido, ensine o raciocinio, mostre um exemplo parecido e deixe uma dica para a crianca tentar sozinha.',
+        'Nao crie explicacoes vagas, genericas ou metacognitivas demais. Ensine o conteudo da materia de verdade.',
         'Nao use conteudo pornografico, violento em excesso, ofensivo ou inadequado para criancas.',
         'Nao use nomes estrangeiros dificeis. Prefira linguagem simples em portugues.',
         $themeInstruction,
@@ -234,7 +251,16 @@ function generateHomeworkFallback(array $payload): array
         'studentName' => (string) $child['studentName'],
         'grade' => (string) $child['grade'],
         'title' => 'Explicacao guiada da licao de casa',
-        'intro' => 'Esta e uma explicacao de apoio para ajudar a crianca a entender a atividade, sem mostrar a resposta final.',
+        'intro' => 'Esta e uma explicacao de apoio para ajudar a crianca a entender a materia e a atividade, sem mostrar a resposta final.',
+        'subjectOverview' => [
+            'title' => 'Entendendo a matéria do arquivo',
+            'body' => 'Primeiro a crianca precisa descobrir qual e o assunto principal da atividade. Depois, vale revisar a regra, a ideia central ou o tipo de conta que aparece no material.',
+            'bullets' => [
+                'Leia o enunciado e descubra qual materia esta sendo trabalhada.',
+                'Observe exemplos, palavras-chave e contas parecidas antes de responder.',
+                'Use a explicacao como apoio para pensar com calma, sem copiar uma resposta pronta.'
+            ]
+        ],
         'items' => [
             [
                 'transcriptionTitle' => 'Exercicio 1',
