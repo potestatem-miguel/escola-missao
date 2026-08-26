@@ -279,6 +279,8 @@ function generateWithGoogle(array $payload, string $apiKey, string $model): arra
             'As alternativas erradas devem ser plausiveis e relacionadas ao mesmo conteudo.',
             'Nas alternativas e explicacoes, nao use nomes estrangeiros, nomes japoneses, termos dificeis de pronunciar ou palavras inventadas.',
             'Prefira nomes simples em portugues.',
+            'Cada questao deve se apoiar explicitamente em pelo menos um dos conceitos-chave presentes na aula_base.',
+            'O enunciado ou a explicacao da resposta deve mencionar de forma clara o conceito trabalhado.',
             $retryInstruction,
             'As questoes de cada crianca devem ser diferentes entre si, mas todas precisam continuar alinhadas a aula_base.',
             'Gere exatamente o numero de questoes solicitado para cada crianca.',
@@ -359,6 +361,7 @@ function generateWithGoogle(array $payload, string $apiKey, string $model): arra
         'subject' => (string) $lessonContent['subject'],
         'topic' => (string) $lessonContent['topic'],
         'difficulty' => (string) $lessonContent['difficulty'],
+        'keyConcepts' => array_values(array_filter($lessonContent['keyConcepts'] ?? [], 'is_string')),
         'lessonSections' => in_array($goal, ['Explicacao', 'Explicacao + Exercicios'], true)
             ? $lessonContent['lessonSections']
             : [],
@@ -453,6 +456,7 @@ function validateGeneratedStudyContent(array $content, array $payload): void
     $goal = trim((string) ($payload['goal'] ?? ''));
     $topic = trim((string) ($payload['topic'] ?? ''));
     $expectedQuestionCount = max(0, (int) ($payload['questionCount'] ?? 0));
+    $keyConcepts = extractRelevantTokens(implode(' ', array_map('strval', $content['keyConcepts'] ?? [])));
     $blockedPatterns = [
         'o que ajuda a aprender',
         'o que mostra que voce entendeu',
@@ -519,7 +523,8 @@ function validateGeneratedStudyContent(array $content, array $payload): void
 
             if ($topic !== '') {
                 $topicTokens = extractRelevantTokens($topic);
-                if ($topicTokens !== [] && !containsAnyToken($joinedText, $topicTokens)) {
+                $referenceTokens = array_values(array_unique(array_merge($topicTokens, $keyConcepts)));
+                if ($referenceTokens !== [] && !containsAnyToken($joinedText, $referenceTokens)) {
                     throw new RuntimeException('A IA retornou uma questao desconectada do topico da materia.');
                 }
             }
