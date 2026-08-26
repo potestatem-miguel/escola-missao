@@ -216,6 +216,10 @@ async function submitHomework(payload) {
     throw new Error(data.error || "Não foi possível explicar a lição de casa.");
   }
 
+  if (data.content?.generatedWithFallback) {
+    throw new Error(data.content.fallbackReason || "A IA não gerou uma explicação confiável da lição. O conteúdo foi bloqueado.");
+  }
+
   return data.content;
 }
 
