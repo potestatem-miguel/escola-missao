@@ -452,6 +452,10 @@ async function generateContent(payload) {
     throw new Error(data.error || "Não foi possível gerar o conteúdo.");
   }
 
+  if (data.content?.generatedWithFallback) {
+    throw new Error(data.content.fallbackReason || "A IA não gerou um conteúdo confiável. O material foi bloqueado para evitar aula ruim.");
+  }
+
   return data.content;
 }
 
