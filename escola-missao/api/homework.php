@@ -67,13 +67,22 @@ if (file_exists($configPath)) {
 
 $apiKey = $config['google_api_key'] ?? (getenv('GOOGLE_API_KEY') ?: '');
 $model = $config['google_model'] ?? (getenv('GOOGLE_MODEL') ?: 'gemini-2.5-flash');
+$allowDemoFallback = shouldUseDemoFallback($config);
 
 try {
+    if ($apiKey === '' && !$allowDemoFallback) {
+        throw new RuntimeException('A chave da IA do Google nao esta configurada. Sem isso, o sistema nao pode explicar a licao com confianca.');
+    }
+
     try {
         $content = $apiKey !== ''
             ? generateHomeworkWithGoogle($payload, $apiKey, $model)
             : generateHomeworkFallback($payload);
     } catch (Throwable $exception) {
+        if (!$allowDemoFallback) {
+            throw new RuntimeException('Nao foi possivel gerar uma explicacao confiavel da licao agora. Tente novamente em alguns instantes. Detalhe: ' . $exception->getMessage());
+        }
+
         $content = generateHomeworkFallback($payload);
         $content['generatedWithFallback'] = true;
         $content['fallbackReason'] = $exception->getMessage();
@@ -238,7 +247,17 @@ function generateHomeworkWithGoogle(array $payload, string $apiKey, string $mode
         throw new RuntimeException('A API do Google retornou uma estrutura invalida.');
     }
 
+    validateGeneratedHomeworkContent($decoded);
+
     return $decoded;
+}
+
+function shouldUseDemoFallback(array $config): bool
+{
+    $value = $config['allow_demo_fallback'] ?? getenv('ALLOW_DEMO_FALLBACK') ?? '';
+    $normalized = strtolower(trim((string) $value));
+
+    return in_array($normalized, ['1', 'true', 'yes', 'sim'], true);
 }
 
 function generateHomeworkFallback(array $payload): array
@@ -284,4 +303,56 @@ function extractTextOutput(array $response): string
 {
     $candidate = $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
     return is_string($candidate) ? trim($candidate) : '';
+}
+
+function validateGeneratedHomeworkContent(array $content): void
+{
+    $blockedPatterns = [
+        'a resposta e',
+        'o resultado final e',
+        'marque a letra',
+        'copie isto',
+        'resposta certa'
+    ];
+
+    $overview = $content['subjectOverview'] ?? null;
+    if (!is_array($overview) || trim((string) ($overview['body'] ?? '')) === '') {
+        throw new RuntimeException('A IA nao retornou a explicacao principal da materia da licao.');
+    }
+
+    $items = $content['items'] ?? null;
+    if (!is_array($items) || count($items) === 0) {
+        throw new RuntimeException('A IA nao retornou a explicacao dos exercicios da licao.');
+    }
+
+    foreach ($items as $item) {
+        $joinedText = normalizeTextForValidation(
+            (string) ($item['transcriptionTitle'] ?? '') . ' ' .
+            (string) ($item['requestSummary'] ?? '') . ' ' .
+            (string) ($item['simpleExplanation'] ?? '') . ' ' .
+            (string) ($item['similarExample'] ?? '') . ' ' .
+            (string) ($item['guidanceTip'] ?? '')
+        );
+
+        foreach ($blockedPatterns as $pattern) {
+            if (str_contains($joinedText, $pattern)) {
+                throw new RuntimeException('A IA retornou uma explicacao da licao com risco de entregar resposta.');
+            }
+        }
+    }
+}
+
+function normalizeTextForValidation(string $text): string
+{
+    $normalized = trim(mb_strtolower($text, 'UTF-8'));
+    $replacements = [
+        'á' => 'a', 'à' => 'a', 'ã' => 'a', 'â' => 'a',
+        'é' => 'e', 'ê' => 'e',
+        'í' => 'i',
+        'ó' => 'o', 'ô' => 'o', 'õ' => 'o',
+        'ú' => 'u',
+        'ç' => 'c'
+    ];
+
+    return strtr($normalized, $replacements);
 }
